@@ -1,5 +1,8 @@
 import cv2
 import mediapipe as mp
+import sys
+import json
+import ast
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -20,7 +23,7 @@ while cap.isOpened():
         break
 
     frame_count += 1
-    if frame_count % 1 == 0:  # Process every frame
+    if frame_count % 2 == 0:  # Process every 2nd frame
         frame = cv2.flip(frame, 1)  # Flip horizontally for a selfie-view
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -36,12 +39,13 @@ while cap.isOpened():
                 index_finger_tip = hand_landmarks.landmark[8]
                 h, w, _ = frame.shape
                 index_x, index_y = int(index_finger_tip.x * w), int(index_finger_tip.y * h)
+                print(f"Index Finger Tip: (x={index_x}, y={index_y})")
                 finger_coordinates.append((index_x, index_y))  # Store index finger coordinates
 
                 # Middle finger tip (Landmark 12)
                 middle_finger_tip = hand_landmarks.landmark[12]
                 middle_x, middle_y = int(middle_finger_tip.x * w), int(middle_finger_tip.y * h)
-
+                #print(f"Middle Finger Tip: (x={middle_x}, y={middle_y})")
                 finger_coordinates.append((middle_x, middle_y))  # Store middle finger coordinates
 
                 # Optionally draw the fingertips on the frame
@@ -49,7 +53,12 @@ while cap.isOpened():
                 cv2.circle(frame, (middle_x, middle_y), 5, (0, 0, 255), -1)  # Red for middle finger
 
                 # Store coordinates in array (finger_coordinates array is updated per frame)
-                print(f"Finger Coordinates Array: {finger_coordinates}")
+                #print(f"Finger Coordinates Array: {finger_coordinates}")
+                input = ast.literal_eval(sys.argv[1])
+                output = input
+
+                output.append(finger_coordinates)
+                sys.stdout.flush()
 
         # Display the frame
         cv2.imshow("Hand Tracking", frame)
